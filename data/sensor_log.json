@@ -1,0 +1,15 @@
+[
+  { "time": "00:00", "temp": 23.1, "humidity": 84, "co2": 890, "substrate_temp": 22.5 },
+  { "time": "02:00", "temp": 22.9, "humidity": 85, "co2": 898, "substrate_temp": 22.3 },
+  { "time": "04:00", "temp": 22.8, "humidity": 85, "co2": 905, "substrate_temp": 22.1 },
+  { "time": "06:00", "temp": 23.0, "humidity": 84, "co2": 912, "substrate_temp": 22.4 },
+  { "time": "08:00", "temp": 24.2, "humidity": 83, "co2": 930, "substrate_temp": 23.0 },
+  { "time": "10:00", "temp": 25.0, "humidity": 81, "co2": 948, "substrate_temp": 23.6 },
+  { "time": "12:00", "temp": 25.6, "humidity": 80, "co2": 960, "substrate_temp": 24.1 },
+  { "time": "14:00", "temp": 25.3, "humidity": 81, "co2": 955, "substrate_temp": 24.0 },
+  { "time": "16:00", "temp": 25.1, "humidity": 82, "co2": 945, "substrate_temp": 23.8 },
+  { "time": "18:00", "temp": 24.9, "humidity": 83, "co2": 935, "substrate_temp": 23.6 },
+  { "time": "20:00", "temp": 24.8, "humidity": 86, "co2": 920, "substrate_temp": 23.5 },
+  { "time": "22:00", "temp": 23.8, "humidity": 87, "co2": 908, "substrate_temp": 22.9 },
+  { "time": "24:00", "temp": 23.5, "humidity": 87, "co2": 900, "substrate_temp": 22.7 }
+]

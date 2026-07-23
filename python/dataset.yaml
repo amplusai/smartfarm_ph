@@ -1,0 +1,9 @@
+path: C:/Users/smhrd1/Desktop/WEB/smartfarm-web/dataset
+train: images/train
+val:   images/val
+
+nc: 3
+names:
+  0: normal
+  1: 세균갈색무늬병
+  2: 푸른곰팡이병
