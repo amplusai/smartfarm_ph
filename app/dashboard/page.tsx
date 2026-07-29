@@ -1,4 +1,5 @@
 import { TemperatureHumidityChart, CO2Chart } from "@/components/SensorChart";
+import { ActuatorControls } from "@/components/ActuatorControls";
 import Link from "next/link";
 import fs from "fs";
 import path from "path";
@@ -9,6 +10,7 @@ type SensorRow = {
   humidity: number;
   co2: number;
   substrate_temp: number;
+  wind_speed: number;
 };
 
 function getLatest(): SensorRow {
@@ -25,6 +27,7 @@ export default function DashboardPage() {
     { label: "습도", value: `${latest.humidity}%`, status: latest.humidity < 80 ? "주의" : "정상", warn: latest.humidity < 80 },
     { label: "CO₂", value: `${latest.co2} ppm`, status: latest.co2 > 950 ? "주의" : "정상", warn: latest.co2 > 950 },
     { label: "배지온도", value: `${latest.substrate_temp}°C`, status: latest.substrate_temp > 25 ? "주의" : "정상", warn: latest.substrate_temp > 25 },
+    { label: "풍속", value: `${latest.wind_speed}m/s`, status: latest.wind_speed < 0.2 ? "주의" : "정상", warn: latest.wind_speed < 0.2 },
   ];
 
   return (
@@ -48,7 +51,7 @@ export default function DashboardPage() {
         </div>
 
         {/* 센서 카드 */}
-        <div className="mt-8 grid grid-cols-2 gap-4 md:grid-cols-4">
+        <div className="mt-8 grid grid-cols-2 gap-4 md:grid-cols-5">
           {sensorData.map((item) => (
             <div key={item.label} className="rounded-2xl border bg-white p-6 shadow-sm">
               <p className="text-sm text-gray-500">{item.label}</p>
@@ -71,6 +74,9 @@ export default function DashboardPage() {
             <CO2Chart />
           </div>
         </div>
+
+        {/* 장치 제어 */}
+        <ActuatorControls />
 
         {/* 구역별 상태 */}
         <div className="mt-6 rounded-2xl border bg-white p-6 shadow-sm">

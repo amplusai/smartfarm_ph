@@ -17,7 +17,7 @@ export async function GET() {
 
 export async function POST(req: NextRequest) {
   const body = await req.json();
-  const { temp, humidity, co2, substrate_temp } = body;
+  const { temp, humidity, co2, substrate_temp, wind_speed } = body;
 
   if (temp == null || humidity == null || co2 == null) {
     return NextResponse.json({ error: "temp, humidity, co2 는 필수입니다." }, { status: 400 });
@@ -29,6 +29,7 @@ export async function POST(req: NextRequest) {
     humidity: Number(humidity),
     co2: Number(co2),
     substrate_temp: substrate_temp != null ? Number(substrate_temp) : null,
+    wind_speed: wind_speed != null ? Number(wind_speed) : null,
   };
 
   const src = path.join(process.cwd(), "data", "sensor_log.json");
