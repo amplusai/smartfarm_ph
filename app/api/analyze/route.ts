@@ -4,7 +4,15 @@ import fs from "fs";
 import path from "path";
 
 const client = new Anthropic();
-const YOLO_SERVER = process.env.YOLO_SERVER_URL ?? "http://localhost:8000";
+const CLASSIFY_SERVER = process.env.CLASSIFY_SERVER_URL ?? "http://localhost:8000";
+
+type ClassificationResult = {
+  class: string;
+  class_kr: string;
+  is_disease: boolean;
+  confidence: number;
+  probabilities: Record<string, number>;
+};
 
 export async function POST(req: NextRequest) {
   try {
@@ -24,23 +32,23 @@ export async function POST(req: NextRequest) {
     const sensorRows = JSON.parse(fs.readFileSync(sensorPath, "utf-8"));
     const sensor = sensorRows[sensorRows.length - 1];
 
-    // YOLO 감지 (FastAPI 서버가 실행 중이면 사용, 아니면 skip)
-    let yolo: { stage?: string; detections?: unknown[]; control?: Record<string, unknown> } | null = null;
+    // ResNet18 병해/정상 분류 (FastAPI 서버가 실행 중이면 사용, 아니면 skip)
+    let classification: ClassificationResult | null = null;
     try {
-      const yoloForm = new FormData();
-      yoloForm.append("file", new Blob([bytes], { type: imageFile.type }), imageFile.name);
-      const yoloRes = await fetch(`${YOLO_SERVER}/analyze`, {
+      const classifyForm = new FormData();
+      classifyForm.append("file", new Blob([bytes], { type: imageFile.type }), imageFile.name);
+      const classifyRes = await fetch(`${CLASSIFY_SERVER}/analyze`, {
         method: "POST",
-        body: yoloForm,
+        body: classifyForm,
         signal: AbortSignal.timeout(5000),
       });
-      if (yoloRes.ok) yolo = await yoloRes.json();
+      if (classifyRes.ok) classification = await classifyRes.json();
     } catch {
-      // YOLO 서버 미실행 시 Claude만 사용
+      // 분류 서버 미실행 시 Claude만 사용
     }
 
-    const yoloContext = yolo
-      ? `\nYOLO 사전 감지 결과: 생육단계=${yolo.stage}, 감지수=${yolo.detections?.length ?? 0}개`
+    const classificationContext = classification
+      ? `\nResNet18 병해 분류 결과: ${classification.class_kr} (신뢰도 ${(classification.confidence * 100).toFixed(1)}%)`
       : "";
 
     // Claude Vision 상세 분석
@@ -57,7 +65,7 @@ export async function POST(req: NextRequest) {
             },
             {
               type: "text",
-              text: `당신은 느타리버섯 재배 전문 AI입니다.${yoloContext}
+              text: `당신은 느타리버섯 재배 전문 AI입니다.${classificationContext}
 
 현재 재배사 환경 센서:
 - 온도: ${sensor.temp}°C  습도: ${sensor.humidity}%  CO₂: ${sensor.co2}ppm  배지온도: ${sensor.substrate_temp}°C
@@ -66,6 +74,9 @@ export async function POST(req: NextRequest) {
 
 ## 🍄 생육 단계
 (균사배양 / 초발이 / 발이 / 생육 / 수확적기 / 과숙 중 하나 + 근거)
+
+## 🩺 병해 진단
+(ResNet18 분류 결과를 참고하여 병해 여부와 종류, 육안 근거를 설명)
 
 ## 📊 생육 상태 평가
 (현재 상태 장단점, 이상 징후 여부)
@@ -89,7 +100,7 @@ export async function POST(req: NextRequest) {
     });
 
     const analysis = (response.content[0] as { type: string; text: string }).text;
-    return NextResponse.json({ analysis, sensor, yolo });
+    return NextResponse.json({ analysis, sensor, classification });
   } catch (error) {
     console.error("분석 오류:", error);
     return NextResponse.json({ error: "분석 중 오류가 발생했습니다." }, { status: 500 });

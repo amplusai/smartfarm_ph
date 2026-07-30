@@ -1,18 +1,28 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
 
-type YoloResult = {
-  stage: string;
-  detections: { label: string; confidence: number }[];
-  control: { temp_target: number; humidity_target: number; co2_limit: number; desc: string };
+type ClassificationResult = {
+  class: string;
+  class_kr: string;
+  is_disease: boolean;
+  confidence: number;
+  probabilities: Record<string, number>;
+};
+
+type SensorRow = {
+  temp: number;
+  humidity: number;
+  co2: number;
+  substrate_temp: number;
+  wind_speed: number;
 };
 
 type AnalyzeResult = {
   analysis: string;
-  sensor: { temp: number; humidity: number; co2: number; substrate_temp: number };
-  yolo: YoloResult | null;
+  sensor: SensorRow;
+  classification: ClassificationResult | null;
 };
 
 export default function AnalyzePage() {
@@ -21,7 +31,14 @@ export default function AnalyzePage() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<AnalyzeResult | null>(null);
   const [error, setError] = useState("");
+  const [sensor, setSensor] = useState<SensorRow | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    fetch("/api/sensor")
+      .then((r) => r.json())
+      .then((rows: SensorRow[]) => setSensor(rows[rows.length - 1]));
+  }, []);
 
   function handleFile(f: File) {
     setFile(f);
@@ -67,8 +84,25 @@ export default function AnalyzePage() {
       <div className="mx-auto max-w-5xl">
         <h1 className="text-3xl font-bold text-green-900">버섯 이미지 분석</h1>
         <p className="mt-2 text-gray-500">
-          버섯 사진을 업로드하면 YOLO 감지 + AI 분석으로 생육단계와 센서 제어 권장값을 제공합니다.
+          버섯 사진을 업로드하면 ResNet18 병해 분류 + AI 분석으로 생육단계와 센서 제어 권장값을 제공합니다.
         </p>
+
+        {/* 현재 센서값 */}
+        {sensor && (
+          <div className="mt-6 grid grid-cols-2 gap-4 md:grid-cols-4">
+            {[
+              { label: "온도", value: `${sensor.temp}°C` },
+              { label: "습도", value: `${sensor.humidity}%` },
+              { label: "CO₂", value: `${sensor.co2} ppm` },
+              { label: "풍속", value: `${sensor.wind_speed}m/s` },
+            ].map((item) => (
+              <div key={item.label} className="rounded-2xl border bg-white p-4 shadow-sm">
+                <p className="text-xs text-gray-500">{item.label}</p>
+                <p className="mt-1 text-xl font-bold text-gray-900">{item.value}</p>
+              </div>
+            ))}
+          </div>
+        )}
 
         {/* 업로드 영역 */}
         <div
@@ -110,35 +144,37 @@ export default function AnalyzePage() {
         {/* 결과 */}
         {result && (
           <div className="mt-8 space-y-6">
-            {/* YOLO 결과 */}
-            {result.yolo && (
+            {/* ResNet18 병해 분류 결과 */}
+            {result.classification && (
               <div className="rounded-2xl border bg-white p-6 shadow-sm">
-                <h2 className="font-bold text-gray-800">YOLO 감지 결과</h2>
-                <div className="mt-3 flex flex-wrap gap-3">
-                  <span className="rounded-full bg-green-100 px-4 py-1 text-sm font-semibold text-green-800">
-                    생육단계: {result.yolo.stage}
+                <h2 className="font-bold text-gray-800">AI 병해 분류 결과 (ResNet18)</h2>
+                <div className="mt-3 flex flex-wrap items-center gap-3">
+                  <span
+                    className={`rounded-full px-4 py-1 text-sm font-semibold ${
+                      result.classification.is_disease
+                        ? "bg-red-100 text-red-700"
+                        : "bg-green-100 text-green-800"
+                    }`}
+                  >
+                    {result.classification.is_disease ? "⚠️" : "✅"} {result.classification.class_kr}
                   </span>
                   <span className="rounded-full bg-gray-100 px-4 py-1 text-sm text-gray-700">
-                    감지: {result.yolo.detections.length}개
+                    신뢰도 {(result.classification.confidence * 100).toFixed(1)}%
                   </span>
                 </div>
-                <div className="mt-4 rounded-xl bg-green-50 p-4">
-                  <p className="text-sm font-medium text-green-800">센서 제어 권장 ({result.yolo.stage})</p>
-                  <div className="mt-2 grid grid-cols-3 gap-4 text-center text-sm">
-                    <div>
-                      <p className="text-gray-500">목표 온도</p>
-                      <p className="font-bold text-green-700">{result.yolo.control.temp_target}°C</p>
+                <div className="mt-4 space-y-2">
+                  {Object.entries(result.classification.probabilities).map(([name, prob]) => (
+                    <div key={name} className="flex items-center gap-3 text-sm">
+                      <span className="w-32 shrink-0 text-gray-600">{name}</span>
+                      <div className="h-2 flex-1 rounded-full bg-gray-100">
+                        <div
+                          className="h-2 rounded-full bg-green-500"
+                          style={{ width: `${prob * 100}%` }}
+                        />
+                      </div>
+                      <span className="w-12 text-right text-gray-500">{(prob * 100).toFixed(0)}%</span>
                     </div>
-                    <div>
-                      <p className="text-gray-500">목표 습도</p>
-                      <p className="font-bold text-green-700">{result.yolo.control.humidity_target}%</p>
-                    </div>
-                    <div>
-                      <p className="text-gray-500">CO₂ 상한</p>
-                      <p className="font-bold text-green-700">{result.yolo.control.co2_limit} ppm</p>
-                    </div>
-                  </div>
-                  <p className="mt-2 text-xs text-gray-500">{result.yolo.control.desc}</p>
+                  ))}
                 </div>
               </div>
             )}
