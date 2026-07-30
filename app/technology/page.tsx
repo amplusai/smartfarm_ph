@@ -53,7 +53,7 @@ export default function TechnologyPage() {
           Technology
         </p>
         <h1 className="mt-4 text-4xl font-extrabold md:text-5xl">
-          AI + IoT 스마트팜 기술
+          EMS + Smartfarm + Cold storage with AI
         </h1>
         <p className="mt-6 max-w-xl mx-auto text-green-100">
           센서에서 AI 분석, 자동제어까지 — 버섯 재배 전 과정을 데이터로 연결합니다.

@@ -1,8 +1,8 @@
 const team = [
   {
-    name: "황현구",
-    role: "PM · 시스템 아키텍처",
-    desc: "IoT 플랫폼 설계 및 스마트팜 비즈니스 총괄",
+    name: "한형률상무이사",
+    role: "PM",
+    desc: "필리핀 실증 테스트베드 프로젝트 총괄",
   },
   {
     name: "AI 생육 전문가",
@@ -17,10 +17,12 @@ const team = [
 ];
 
 const milestones = [
-  { year: "2023", event: "IOTplus 창업 및 스마트팜 R&D 시작" },
-  { year: "2024", event: "필리핀 현지 파트너십 체결 및 테스트베드 착공" },
-  { year: "2025", event: "1,200평 버섯 스마트팜 실증 운영 개시" },
-  { year: "2026", event: "AI 생육관리 시스템 고도화 및 사업 확장" },
+  { year: "2025", event: " Acquired ISO 14001 & ISO 9001 Certifications" },
+  { year: "2024", event: " Selected for the [2024 Research-and-Development Innopolis Foster (R&D) Project] " },
+  { year: "2023", event: " Acquired ISO 14001 & ISO 9001 Certifications \n Acquired [KEPCO Trusted Partner (KTP)] certification from the Korea Electric Power Corporation (KEPCO)" },
+  { year: "2022", event: " Patent Transfer: Transferred patent from the Korea Institute of Energy Research" },
+  { year: "2021", event: " Establishment of an In-House Corporate Research Institute" },
+  { year: "2020", event: "IOTPLUS Co., Ltd Established in" },
 ];
 
 export default function AboutPage() {
@@ -29,15 +31,15 @@ export default function AboutPage() {
       {/* Hero */}
       <section className="bg-gradient-to-b from-green-900 to-green-700 px-8 py-24 text-center text-white">
         <p className="text-sm font-semibold uppercase tracking-widest text-green-300">
-          About IOTplus
+          About Platform
         </p>
         <h1 className="mt-4 text-4xl font-extrabold md:text-5xl">
-          농업의 미래를 기술로 만듭니다
+          SmartFarm
         </h1>
         <p className="mt-6 max-w-xl mx-auto text-green-100">
-          IOTplus는 AI·IoT 기술을 기반으로 필리핀 버섯 스마트팜 실증 플랫폼을
-          구축·운영하는 농업 기술 기업입니다.
-        </p>
+          AI·IoT 기술을 기반으로 에너지(EMS)와 콜드스토리지 및 스마트팜
+          구축·운영중.
+                </p>
       </section>
 
       {/* Mission */}
@@ -45,12 +47,10 @@ export default function AboutPage() {
         <div className="mx-auto max-w-3xl text-center">
           <h2 className="text-3xl font-bold text-gray-900">미션</h2>
           <p className="mt-6 text-lg leading-relaxed text-gray-600">
-            개발도상국 농업 현장에 AI·IoT 기술을 접목해 생산성과 수익성을
-            함께 높이고, 지속 가능한 식량 생산 모델을 실증합니다.
+            To establish and demonstrate an intelligent, energy-self-sufficient cold-chain system that integrates renewable energy, energy storage, heat pumps, and AI-based energy management, thereby reducing food loss and enabling reliable cold storage in regions with unstable power infrastructure.
             <br />
             <br />
-            1,200평 테스트베드를 통해 검증된 기술을 동남아시아 전역으로
-            확산하는 것이 IOTplus의 목표입니다.
+            재생에너지와 AI 기반 열·전기 통합관리 기술을 활용하여 전력 인프라가 취약한 지역에서도 안정적으로 운영되는 에너지 자립형 저온시설을 구축하고, 농수산물 손실을 줄이는 지속가능한 콜드체인 사업모델을 실증·확산하는 것입니다.
           </p>
         </div>
       </section>
@@ -68,7 +68,7 @@ export default function AboutPage() {
                   {m.year}
                 </span>
                 <div className="flex flex-col gap-1 border-l-2 border-green-300 pl-6">
-                  <p className="text-gray-800">{m.event}</p>
+                  <p className="whitespace-pre-line text-gray-800">{m.event}</p>
                 </div>
               </li>
             ))}
@@ -79,7 +79,7 @@ export default function AboutPage() {
       {/* Team */}
       <section className="px-8 py-20">
         <div className="mx-auto max-w-4xl">
-          <h2 className="text-center text-3xl font-bold text-gray-900">팀</h2>
+          <h2 className="text-center text-3xl font-bold text-gray-900">팀원</h2>
           <div className="mt-12 grid gap-8 md:grid-cols-3">
             {team.map((member) => (
               <div
