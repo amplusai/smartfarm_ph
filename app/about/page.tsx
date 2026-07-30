@@ -34,7 +34,7 @@ export default function AboutPage() {
           About Platform
         </p>
         <h1 className="mt-4 text-4xl font-extrabold md:text-5xl">
-          SmartFarm
+          EcoFarm_EMS
         </h1>
         <p className="mt-6 max-w-xl mx-auto text-green-100">
           AI·IoT 기술을 기반으로 에너지(EMS)와 콜드스토리지 및 스마트팜
