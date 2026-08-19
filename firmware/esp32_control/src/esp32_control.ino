@@ -4,12 +4,20 @@
 #include <Wire.h>
 #include "Adafruit_SHT31.h"
 
-// Wi-Fi
-const char* WIFI_SSID = "YOUR_WIFI_SSID";
-const char* WIFI_PASSWORD = "YOUR_WIFI_PASSWORD";
+// Wi-Fi 프로필 (장소마다 SSID/비밀번호/서버 IP가 다르므로 배열로 등록)
+struct WifiProfile {
+  const char* ssid;
+  const char* password;
+  const char* serverHost; // 이 네트워크에서 대시보드 서버(PC)가 받는 로컬 IP
+};
+
+#include "wifi_secrets.h" // SSID/비밀번호는 별도 파일(gitignore 처리됨)에 보관
+const int WIFI_PROFILE_COUNT = sizeof(WIFI_PROFILES) / sizeof(WIFI_PROFILES[0]);
+
+// 연결된 프로필에 맞춰 connectWifi()에서 갱신됨
+const char* SERVER_HOST = WIFI_PROFILES[0].serverHost;
 
 // 대시보드 서버
-const char* SERVER_HOST = "http://192.168.0.10:3000";
 const char* CONTROL_ENDPOINT = "/api/control";
 const char* SENSOR_ENDPOINT = "/api/sensor";
 
@@ -44,17 +52,32 @@ void setRelay(int pin, bool on) {
 }
 
 void connectWifi() {
-  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
-
-  Serial.print("Wi-Fi 연결 중");
+  Serial.println("Wi-Fi 연결 시도...");
 
   while (WiFi.status() != WL_CONNECTED) {
-    delay(300);
-    Serial.print(".");
-  }
+    for (int i = 0; i < WIFI_PROFILE_COUNT; i++) {
+      Serial.printf("'%s' 연결 시도 중", WIFI_PROFILES[i].ssid);
+      WiFi.begin(WIFI_PROFILES[i].ssid, WIFI_PROFILES[i].password);
 
-  Serial.print("\nWi-Fi 연결됨: ");
-  Serial.println(WiFi.localIP());
+      unsigned long attemptStartedAt = millis();
+      while (WiFi.status() != WL_CONNECTED && millis() - attemptStartedAt < 8000) {
+        delay(300);
+        Serial.print(".");
+      }
+
+      if (WiFi.status() == WL_CONNECTED) {
+        SERVER_HOST = WIFI_PROFILES[i].serverHost;
+        Serial.print("\nWi-Fi 연결됨: ");
+        Serial.print(WIFI_PROFILES[i].ssid);
+        Serial.print(" / IP: ");
+        Serial.println(WiFi.localIP());
+        return;
+      }
+
+      Serial.println("\n연결 실패, 다음 프로필 시도");
+      WiFi.disconnect();
+    }
+  }
 }
 
 void pollControlState() {
